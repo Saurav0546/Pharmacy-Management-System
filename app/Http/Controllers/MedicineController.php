@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MedicineUpdateRequest;
+use App\Services\MedicineFilterService;
 use App\Models\Medicine;
 use App\Traits\ApiResponseTrait;
 use App\Middleware\LocaleMiddleware;
@@ -22,15 +23,23 @@ class MedicineController extends Controller
         $perPage = $request->input('per_page', 7);
 
         // Query the medicines
-        $medicines = Medicine::query();
+        $medicines = Medicine::with(['orders']);
 
-        //Searching
+        //Filtering based on minimum and maximum price
+        if ($request->has('price_min') && $request->has('price_max')) {
+            $minPrice = $request->input('price_min');
+            $maxPrice = $request->input('price_max');
+            $medicines->whereBetween('price', [$minPrice, $maxPrice]);
+        }
         if ($request->has('search')) {
             $search = $request->input('search');
             $medicines->where('name', 'like', '%' . $search . '%')
-                ->orWhere('price', 'like', '%' . $search . '%');
+            ->orWhere('price', 'like', '%' . $search . '%')
+            ->orWhere('description', 'like', '%' . $search . '%')
+            ->orWhereHas('orders', function ($query) use ($search) {
+                $query->where('customer_name', 'like', '%' . $search . '%');
+            });
         }
-
         //Sorting
         if ($request->has('sort_by') && $request->has('sort_order')) {
             $sortBy = $request->input('sort_by');
@@ -40,23 +49,20 @@ class MedicineController extends Controller
         } else {
 
             //Set id as default sorting
-            $medicines->orderBy('name', 'asc');
-        }    
+            $medicines->orderBy('id', 'asc');
+        }
 
         if ($request->has('page')) {
             $medicines = $medicines->paginate($perPage)->items();
         } else {
             $medicines = $medicines->get();
         }
-
-
         return response()->json([
             'data' => $medicines,
             'message' => __('messages.medicines.fetched'),
             'status' => '1'
         ]);
     }
-
     //CREATE A MEDICINE
     public function store(StoreMedicineRequest $request)
     {
