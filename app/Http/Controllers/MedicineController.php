@@ -31,7 +31,7 @@ class MedicineController extends Controller
             $maxPrice = $request->input('price_max');
             $medicines->whereBetween('price', [$minPrice, $maxPrice]);
         }
-        //Searching
+        //Searching logic
         if ($request->has('search')) {
             $search = $request->input('search');
             
