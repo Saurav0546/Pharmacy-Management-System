@@ -25,13 +25,6 @@ class MedicineController extends Controller
         // Query the medicines
         $medicines = Medicine::with(['orders']);
 
-        $medicines = Cache::remember(
-            $cacheKey,
-            now()->addMinutes(10),
-            function () use ($request, $perPage) {
-                // Query the medicines
-                $medicines = Medicine::with(['orders']);
-                
         // Filtering based on minimum and maximum price
         if ($request->has('price_min') && $request->has('price_max')) {
             $minPrice = $request->input('price_min');
