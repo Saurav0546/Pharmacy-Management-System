@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    
     public function index()
     {
         $orders = Order::with('medicines')->get();
@@ -18,6 +19,7 @@ class OrderController extends Controller
             'message' => __('messages.orders.fetched')
         ], 200);
     }
+
 
     public function show($id)
     {
