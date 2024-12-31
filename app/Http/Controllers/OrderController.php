@@ -39,7 +39,7 @@ class OrderController extends Controller
             'order_date' => $request->order_date
         ]);
 
-        // Calculating total price of an order quantity
+        // Calculating total price based an order quantity
         $medicinesData = [];
         $totalPrice = 0;  // Initialize the total price
 
