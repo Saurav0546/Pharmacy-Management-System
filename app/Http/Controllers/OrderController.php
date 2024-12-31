@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    
-    public function index()
+    // Get orders
+    public function index(Request $request)
     {
         $orders = Order::with('medicines')->get();
         return response()->json([
@@ -20,7 +20,7 @@ class OrderController extends Controller
         ], 200);
     }
 
-
+    // Get single order
     public function show($id)
     {
         return Order::with('medicines')->findOrFail($id);
@@ -30,6 +30,7 @@ class OrderController extends Controller
         ], 200);
     }
 
+    // Create order
     public function store(StoreOrderRequest $request)
     {
         // Create the order
@@ -38,41 +39,33 @@ class OrderController extends Controller
             'order_date' => $request->order_date
         ]);
 
-
+        // Calculating total price of an order quantity
         $medicinesData = [];
         $totalPrice = 0;  // Initialize the total price
 
         if ($request->has('medicines')) {
             foreach ($request->medicines as $medicine) {
                 if (isset($medicine['id']) && isset($medicine['quantity'])) {
-                  
                     $medicineRecord = Medicine::find($medicine['id']);
                     if ($medicineRecord) {
-                       
                         $price = $medicineRecord->price;
                         $quantity = $medicine['quantity'];
                         $totalPrice += $price * $quantity;  
-
                         $medicinesData[$medicine['id']] = ['quantity' => $quantity];
                     }
                 }
             }
         }
-
-    
         $order->medicines()->attach($medicinesData);
-        
         $order->total_price = $totalPrice;
         $order->save();
-
         return response()->json([
             'data' => $order->load('medicines'),
             'message' => __('messages.orders.created')
         ], 201);
     }
 
-
-
+    // Update order
     public function update(OrderUpdateRequest $request, $id)
     {
         $order = Order::findOrFail($id);
@@ -91,6 +84,7 @@ class OrderController extends Controller
         ], 200);
     }
 
+    // Delete order
     public function destroy($id)
     {
         $order = Order::findOrFail($id);

@@ -12,10 +12,10 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    // Registering a user
     public function register(UserRegisterRequest $request)
     {
-        // Create the user using the validated data
-        $user = User::create([
+            $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -28,12 +28,10 @@ class UserController extends Controller
         ], 201);
     }
 
+    // Login a user
     public function login(UserRequest $request)
     {
-
         $user = User::where('email', $request->email)->first();
-
-
         if (! Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'The email or password is incorrect, please try again'], 422);
         } else {
@@ -44,14 +42,13 @@ class UserController extends Controller
                 'status' => '1',
             ]);
         }
-
     }
+
+    // Logout a user
     function logout(Request $request)
     {
         $user = User::where('email', $request->email)->first();
-
         $user->tokens()->delete();
-
         return response()->json(['success' => 'Logged Out Successfully!']);
     }
 }

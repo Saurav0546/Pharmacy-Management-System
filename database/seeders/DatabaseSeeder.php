@@ -13,9 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create 10 users using the user factory 
         User::factory(10)->create();
 
-        // Create 50 medicines using the medicine factory 
+        // Create 20 medicines using the medicine factory 
         Medicine::factory(20)->create();
     }  
 }

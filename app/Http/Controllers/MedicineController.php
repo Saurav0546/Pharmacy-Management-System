@@ -16,22 +16,29 @@ class MedicineController extends Controller
 {
     use ApiResponseTrait;
 
-    //GET ALL MEDICINES
+    // Get medicines
     public function index(Request $request)
     {
-        //Pagination
+        // Pagination
         $perPage = $request->input('per_page', 7);
 
         // Query the medicines
         $medicines = Medicine::with(['orders']);
 
-        //Filtering based on minimum and maximum price
+        $medicines = Cache::remember(
+            $cacheKey,
+            now()->addMinutes(10),
+            function () use ($request, $perPage) {
+                // Query the medicines
+                $medicines = Medicine::with(['orders']);
+                
+        // Filtering based on minimum and maximum price
         if ($request->has('price_min') && $request->has('price_max')) {
             $minPrice = $request->input('price_min');
             $maxPrice = $request->input('price_max');
             $medicines->whereBetween('price', [$minPrice, $maxPrice]);
         }
-        //Searching logic
+        // Searching 
         if ($request->has('search')) {
             $search = $request->input('search');
             
@@ -42,15 +49,14 @@ class MedicineController extends Controller
                     });
             });
         }
-        //Sorting
+        // Sorting
         if ($request->has('sort_by') && $request->has('sort_order')) {
             $sortBy = $request->input('sort_by');
             $sortOrder = $request->input('sort_order');
 
             $medicines->orderBy($sortBy, $sortOrder);
         } else {
-
-            //Set id as default sorting
+            //Set id as default 
             $medicines->orderBy('id', 'asc');
         }
 
@@ -65,11 +71,10 @@ class MedicineController extends Controller
             'status' => '1'
         ]);
     }
-    //CREATE A MEDICINE
+    
+    // Create a medicine
     public function store(StoreMedicineRequest $request)
     {
-
-        // Create the medicine using the validated data
         $medicine = Medicine::create(
             [
                 'name' => $request->name,
@@ -78,32 +83,25 @@ class MedicineController extends Controller
                 'price' => $request->price
             ]
         );
-
-        // Return a success response
+        
         return response()->json([
             'data' => $medicine,
             'message' => __('messages.medicines.created')
         ]);
     }
 
-    //SHOW SINGLE MEDICINE 
+    // Show single medicine
     public function show(Medicine $medicine)
     {
-        // dd($medicine);
-        // dd("here");
-        // $medicine = Medicine::findOrFail($medicine);
-
         return response()->json([
             'data' => $medicine,
             'message' => __('messages.medicines.found')
         ]);
     }
 
-    //UPDATE MEDICINE
+    // Update medicine
     public function update(MedicineUpdateRequest $request, Medicine $medicine)
     {
-        // $medicine = Medicine::findOrFail($medicine);
-
         if ($request->name) {
             $medicine->name = $request->name;
         }
@@ -129,13 +127,10 @@ class MedicineController extends Controller
         ]);
     }
 
-    //DELETE MEDICINE
+    // Delete medicine
     public function destroy(Medicine $medicine)
     {
-        // $medicine = Medicine::findOrFail($medicine);
-
         $medicine->delete();
-
         return response()->json([
             'data' => $medicine,
             'message' => __('messages.medicines.deleted')
