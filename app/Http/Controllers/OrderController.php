@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderUpdateRequest;
 use App\Models\Order;
+use App\Models\Medicine;
 use App\Http\Requests\StoreOrderRequest;
 use Illuminate\Http\Request;
 
@@ -29,28 +30,45 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request)
     {
-
+        // Create the order
         $order = Order::create([
             'customer_name' => $request->customer_name,
             'order_date' => $request->order_date
         ]);
 
+
         $medicinesData = [];
+        $totalPrice = 0;  // Initialize the total price
+
         if ($request->has('medicines')) {
             foreach ($request->medicines as $medicine) {
                 if (isset($medicine['id']) && isset($medicine['quantity'])) {
-                    $medicinesData[$medicine['id']] = ['quantity' => $medicine['quantity']];
+                  
+                    $medicineRecord = Medicine::find($medicine['id']);
+                    if ($medicineRecord) {
+                       
+                        $price = $medicineRecord->price;
+                        $quantity = $medicine['quantity'];
+                        $totalPrice += $price * $quantity;  
+
+                        $medicinesData[$medicine['id']] = ['quantity' => $quantity];
+                    }
                 }
             }
         }
 
+    
         $order->medicines()->attach($medicinesData);
+        
+        $order->total_price = $totalPrice;
+        $order->save();
 
         return response()->json([
             'data' => $order->load('medicines'),
             'message' => __('messages.orders.created')
-        ], 201); 
+        ], 201);
     }
+
 
 
     public function update(OrderUpdateRequest $request, $id)

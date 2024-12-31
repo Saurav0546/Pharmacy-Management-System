@@ -6,6 +6,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Middleware\LocaleMiddleware;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 

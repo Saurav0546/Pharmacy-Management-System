@@ -33,11 +33,12 @@ class MedicineController extends Controller
         }
         if ($request->has('search')) {
             $search = $request->input('search');
-            $medicines->where('name', 'like', '%' . $search . '%')
-            ->orWhere('price', 'like', '%' . $search . '%')
-            ->orWhere('description', 'like', '%' . $search . '%')
-            ->orWhereHas('orders', function ($query) use ($search) {
-                $query->where('customer_name', 'like', '%' . $search . '%');
+            
+            $medicines->where(function ($query) use ($search) {
+                $query->where('name', '=', $search)  // Exact match for medicine name
+                    ->orWhereHas('orders', function ($query) use ($search) {
+                        $query->where('customer_name', '=', $search);  // Exact match for customer_name in orders
+                    });
             });
         }
         //Sorting
