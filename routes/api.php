@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Firstly user have to register and login after that a token will generated and that token will be used to access the api
 
 // Routes for user authentication
 Route::post('/register', [UserController::class, 'register']);
