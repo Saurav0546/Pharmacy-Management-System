@@ -49,7 +49,7 @@ class MedicineController extends Controller
 
             $medicines->orderBy($sortBy, $sortOrder);
         } else {
-            //Set id as default 
+            // Set id as default
             $medicines->orderBy('id', 'asc');
         }
 
