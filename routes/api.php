@@ -40,5 +40,4 @@ Route::middleware(["auth:sanctum", "localization"])->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{order}', [OrderController::class, 'update']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
-    
 });
