@@ -28,4 +28,17 @@ class Medicine extends Model
                      ->orWhere('price', $minPrice)
                      ->orWhere('price', $maxPrice);
     }
+
+    // Scope attribute for sorting
+    public function scopeSortBy($query, $sortBy, $sortOrder)
+    {
+        return $query->orderBy($sortBy, $sortOrder);
+    }
+    // Scope attribute for searching
+    public function scopeSearchByCustomerName($query, $customerName)
+    {
+        return $query->whereHas('orders', function ($query) use ($customerName) {
+            $query->where('customer_name', '=', $customerName);
+        });
+    }
 }

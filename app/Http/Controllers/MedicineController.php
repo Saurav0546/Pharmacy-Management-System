@@ -41,31 +41,31 @@ class MedicineController extends Controller
         ]);
     }
 
+    // Filters
     private function applyFilters($query, Request $request)
     {
-        // Searching (Filter medicines by customer name)
+        // Filtering by customer
         if ($request->has('ordered_by')) {
             $search = $request->input('ordered_by');
-            $query->whereHas('orders', function ($query) use ($search) {
-                $query->where('customer_name', '=', $search);  // Exact match for customer name
-            });
+            $query->searchByCustomerName($search);  // Using the search scope
         }
 
         // Filtering by price
         if ($request->has('price_min') || $request->has('price_max')) {
             $minPrice = $request->input('price_min');
             $maxPrice = $request->input('price_max');
-            $query->PriceRange($minPrice, $maxPrice);  
+            $query->priceRange($minPrice, $maxPrice);  // Using the price range scope
         }
     }
 
+    // Sorting
     private function applySorting($query, Request $request)
     {
         // Sorting
         if ($request->has('sort_by') && $request->has('sort_order')) {
             $sortBy = $request->input('sort_by');
             $sortOrder = $request->input('sort_order');
-            $query->orderBy($sortBy, $sortOrder);
+            $query->sortBy($sortBy, $sortOrder);  // Using sort scope
         }
     }
     // Create a medicine
