@@ -13,7 +13,16 @@ class OrderController extends Controller
     // Get orders
     public function index(Request $request)
     {
-        $orders = Order::with('medicines')->get();
+        $orders = Order::with('medicines');
+
+        // Searching - Filter orders by customer name
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $orders->where('customer_name', 'like', '%' . $search . '%');
+        }
+        $orders = $orders->get();
+       
+        // Return JSON response
         return response()->json([
             'data' => $orders,
             'message' => __('messages.orders.fetched')
@@ -89,6 +98,8 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
         $order->delete();
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => __('messages.orders.deleted')
+        ], 204);
     }
 }
