@@ -15,56 +15,59 @@ use Exception;
 class MedicineController extends Controller
 {
     use ApiResponseTrait;
-
     // Get medicines
     public function index(Request $request)
     {
         // Pagination
-        $perPage = $request->input('per_page', 7);
+        $perPage = 7;
 
         // Query the medicines
-        $medicines = Medicine::with(['orders']);
+        $medicines = Medicine::query();
 
-        // Filtering based on minimum and maximum price
-        if ($request->has('price_min') && $request->has('price_max')) {
-            $minPrice = $request->input('price_min');
-            $maxPrice = $request->input('price_max');
-            $medicines->whereBetween('price', [$minPrice, $maxPrice]);
-        }
-        // Searching 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            
-            $medicines->where(function ($query) use ($search) {
-                $query->where('name', '=', $search)  // Exact match for medicine name
-                    ->orWhereHas('orders', function ($query) use ($search) {
-                        $query->where('customer_name', '=', $search);  // Exact match for customer_name in orders
-                    });
-            });
-        }
-        // Sorting
-        if ($request->has('sort_by') && $request->has('sort_order')) {
-            $sortBy = $request->input('sort_by');
-            $sortOrder = $request->input('sort_order');
+        // Apply filters
+        $this->applyFilters($medicines, $request);
 
-            $medicines->orderBy($sortBy, $sortOrder);
-        } else {
-            // Set id as default
-            $medicines->orderBy('id', 'asc');
-        }
+        // Apply sorting
+        $this->applySorting($medicines, $request);
 
-        if ($request->has('page')) {
-            $medicines = $medicines->paginate($perPage)->items();
-        } else {
-            $medicines = $medicines->get();
-        }
+        // Pagination logic
+        $medicines = $request->page ? $medicines->simplePaginate($perPage) : $medicines->get();
+
         return response()->json([
+            'count' => $medicines->count(),
             'data' => $medicines,
             'message' => __('messages.medicines.fetched'),
             'status' => '1'
         ]);
     }
-    
+
+    private function applyFilters($query, Request $request)
+    {
+        // Searching (Filter medicines by customer name)
+        if ($request->has('ordered_by')) {
+            $search = $request->input('ordered_by');
+            $query->whereHas('orders', function ($query) use ($search) {
+                $query->where('customer_name', '=', $search);  // Exact match for customer name
+            });
+        }
+
+        // Filtering by price
+        if ($request->has('price_min') || $request->has('price_max')) {
+            $minPrice = $request->input('price_min');
+            $maxPrice = $request->input('price_max');
+            $query->PriceRange($minPrice, $maxPrice);  
+        }
+    }
+
+    private function applySorting($query, Request $request)
+    {
+        // Sorting
+        if ($request->has('sort_by') && $request->has('sort_order')) {
+            $sortBy = $request->input('sort_by');
+            $sortOrder = $request->input('sort_order');
+            $query->orderBy($sortBy, $sortOrder);
+        }
+    }
     // Create a medicine
     public function store(StoreMedicineRequest $request)
     {
@@ -76,7 +79,7 @@ class MedicineController extends Controller
                 'price' => $request->price
             ]
         );
-        
+
         return response()->json([
             'data' => $medicine,
             'message' => __('messages.medicines.created')

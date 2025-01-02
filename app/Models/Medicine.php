@@ -20,4 +20,12 @@ class Medicine extends Model
     {
         return $this->belongsToMany(Order::class)->withPivot('quantity');
     }
+    
+    // Scope attribute for price range
+    public function scopePriceRange($query, $minPrice, $maxPrice)
+    {
+        return $query->whereBetween('price', [$minPrice, $maxPrice])
+                     ->orWhere('price', $minPrice)
+                     ->orWhere('price', $maxPrice);
+    }
 }

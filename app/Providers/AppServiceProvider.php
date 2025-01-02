@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Providers;
-use App\Models\Order;
+use App\Models\Medicine;
 use App\Observers\OrderObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,11 +16,14 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
+/*************  ✨ Codeium Command 🌟  *************/
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
-        
+        Route::bind('PriceRange', function ($value) {
+            return Medicine::withoutGlobalScope('active')->where('PriceRange', $value)->firstOrFail();
+        });
     }
 }
