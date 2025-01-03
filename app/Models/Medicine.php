@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -45,10 +46,23 @@ class Medicine extends Model
     }
 
     // Get quantity attribute
-    public function getQuantityAttribute() {
-        $totalStock = $this->stock;
-        $totalOrders = $this->orders()->sum('quantity');
+    // public function getQuantityAttribute() {
+    //     $totalStock = $this->stock;
+    //     $totalOrders = $this->orders()->sum('quantity');
 
-        return $totalStock - $totalOrders;
+    //     return $totalStock - $totalOrders;
+    // }
+    protected function quantity(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->calculateQuantity(), 
+        );
     }
+
+    // Example method to calculate quantity (you can customize this)
+    protected function calculateQuantity()
+    {
+        return $this->stock; 
+    }
+
 }
