@@ -13,7 +13,10 @@ class OrderController extends Controller
     // Get orders
     public function index(Request $request)
     {
+        $orders = Order::all();
+
         $orders = Order::with('medicines');
+        
         // Searching - Filter orders by customer name
         if ($request->has('search')) {
             $search = $request->input('search');
