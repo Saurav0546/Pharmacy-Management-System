@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Medicine;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Order;
 use App\Policies\MedicinePolicy;
 use App\Policies\OrderPolicy;
@@ -19,7 +20,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        
+        Medicine::class => MedicinePolicy::class,
     ];
 
     /**
@@ -27,6 +28,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerPolicies();
 
     }
 }
