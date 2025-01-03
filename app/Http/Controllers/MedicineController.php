@@ -6,6 +6,7 @@ use App\Http\Requests\MedicineUpdateRequest;
 use App\Services\MedicineFilterService;
 use App\Models\Medicine;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Support\Facades\Gate;
 use App\Middleware\LocaleMiddleware;
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\ShowMedicineRequest;
@@ -69,8 +70,11 @@ class MedicineController extends Controller
         }
     }
     // Create a medicine
-    public function store(StoreMedicineRequest $request)
+    public function store(StoreMedicineRequest $request, Medicine $medicine)
     {
+        // Authorization
+        $this->authorize('create', $medicine);
+        
         $medicine = Medicine::create(
             [
                 'name' => $request->name,
@@ -89,6 +93,9 @@ class MedicineController extends Controller
     // Show single medicine
     public function show(Medicine $medicine)
     {
+        // Authorization
+        $this->authorize('view', $medicine);
+        
         return response()->json([
             'data' => $medicine,
             'message' => __('messages.medicines.found')
@@ -127,6 +134,8 @@ class MedicineController extends Controller
     // Delete medicine
     public function destroy(Medicine $medicine)
     {
+        $this->authorize('delete', $medicine);
+        
         $medicine->delete();
         return response()->json([
             'data' => $medicine,
