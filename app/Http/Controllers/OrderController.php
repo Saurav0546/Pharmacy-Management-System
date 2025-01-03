@@ -14,7 +14,6 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = Order::with('medicines');
-
         // Searching - Filter orders by customer name
         if ($request->has('search')) {
             $search = $request->input('search');
