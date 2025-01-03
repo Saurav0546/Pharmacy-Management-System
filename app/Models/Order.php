@@ -9,6 +9,8 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected $appends = ['quantity'];
+
     protected $fillable = [
         'customer_name', 
         'order_date', 
@@ -18,5 +20,10 @@ class Order extends Model
     public function medicines()
     {
         return $this->belongsToMany(Medicine::class)->withPivot('quantity');
+    }
+
+    // Quantity attribute
+    public function getQuantityAttribute() {
+        return $this->attributes['quantity'];
     }
 }

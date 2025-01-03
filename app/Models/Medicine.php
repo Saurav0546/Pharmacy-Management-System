@@ -9,6 +9,8 @@ class Medicine extends Model
 {
     use HasFactory;
 
+    protected $appends = ['quantity'];
+
     protected $fillable = [
         'name',
         'description',
@@ -40,5 +42,13 @@ class Medicine extends Model
         return $query->whereHas('orders', function ($query) use ($customerName) {
             $query->where('customer_name', '=', $customerName);
         });
+    }
+
+    // Get quantity attribute
+    public function getQuantityAttribute() {
+        $totalStock = $this->stock;
+        $totalOrders = $this->orders()->sum('quantity');
+
+        return $totalStock - $totalOrders;
     }
 }
