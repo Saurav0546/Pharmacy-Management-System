@@ -98,6 +98,7 @@ class MedicineController extends Controller
     // Update medicine
     public function update(MedicineUpdateRequest $request, Medicine $medicine)
     {
+        
         if ($request->name) {
             $medicine->name = $request->name;
         }
